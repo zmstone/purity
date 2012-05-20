@@ -25,18 +25,13 @@ SRC   := $(addsuffix .erl, $(FILES))
 BIN   := $(addprefix $(EBIN)/, $(addsuffix .beam, $(FILES)))
 CHEATS := predef/cheats predef/bifs predef/primops
 
-APP_FILE := purity.app
-APP_SRC  := $(APP_FILE).src
-APP      := $(EBIN)/$(APP_FILE)
-
-
 GENERATED := $(ESRC)/purity_bifs.erl
 
 TEST_SRC := $(wildcard $(TEST)/*.erl)
 TEST_BIN := $(patsubst %.erl, %.beam, $(TEST_SRC))
 
 
-all: $(EBIN) $(BIN) $(APP)
+all: $(EBIN) $(BIN)
 
 ## Dependencies ##
 
@@ -53,9 +48,6 @@ $(TEST)/%.beam: $(TEST)/%.erl
 
 $(GENERATED): $(CHEATS)
 	@$(SCRIPTS)/purity_bifs $^ > $@
-
-$(APP): $(ESRC)/$(APP_SRC) vsn.mk
-	sed -e 's/%VSN%/$(VSN)/' $< > $@
 
 ## Specific rules ##
 
@@ -95,7 +87,7 @@ clean:
 	./rebar clean
 
 distclean: clean
-	$(RM) $(TEST_BIN) $(APP) README.html $(addprefix doc/,$(DOCFILES))
+	$(RM) $(TEST_BIN) README.html $(addprefix doc/,$(DOCFILES))
 
 count:
 	@sloccount . | awk '/^SLOC\t/,/^Total Physical/ { print }' | grep -v '^$$'
