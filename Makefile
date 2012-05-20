@@ -1,6 +1,6 @@
 # vim: set noet ts=8 sw=8:
 
-.PHONY: units clean count build_tests tests dialyzer_plt dialyzer docs
+.PHONY: compille units clean count build_tests tests dialyzer_plt dialyzer docs
 
 ERLC ?= erlc
 DIALYZER ?= dialyzer
@@ -36,42 +36,22 @@ TEST_SRC := $(wildcard $(TEST)/*.erl)
 TEST_BIN := $(patsubst %.erl, %.beam, $(TEST_SRC))
 
 
-all: $(EBIN) $(GENERATED) $(BIN) $(APP)
+all: $(EBIN) $(BIN) $(APP)
 
 ## Dependencies ##
 
+$(EBIN): compile
 
 ## Generic rules ##
-
-# Mercurial does not track empty directories, so create build dir if missing.
-$(EBIN):
-	mkdir -p $(EBIN)
-
-$(EBIN)/%.beam: $(ESRC)/%.erl $(ESRC)/%.hrl
-	@echo " h  ERLC $<"
-	@$(ERLC) $(EFLAGS) -o $(EBIN) $<
-
-$(EBIN)/%.beam: $(ESRC)/%.erl $(ESRC)/%_tests.hrl
-	@echo " t  ERLC $<"
-	@$(ERLC) $(EFLAGS) -o $(EBIN) $<
-
-$(EBIN)/%.beam: $(ESRC)/%.erl
-	@echo "    ERLC $<"
-	@$(ERLC) $(EFLAGS) -o $(EBIN) $<
-
 
 $(TEST)/%.beam: $(TEST)/%.erl
 	@echo "T  ERLC $<"
 	@$(ERLC) $(EFLAGS) -o $(dir $<) $<
 
-#.erl.beam:
-%.beam: %.erl
-	$(ERLC) $(EFLAGS) -o $(dir $@) $<
-
 %.html: %.txt
 	asciidoc $<
 
-$(ESRC)/purity_bifs.erl: $(CHEATS)
+$(GENERATED): $(CHEATS)
 	@$(SCRIPTS)/purity_bifs $^ > $@
 
 $(APP): $(ESRC)/$(APP_SRC) vsn.mk
@@ -112,11 +92,14 @@ docs:
 
 
 clean:
-	$(RM) $(BIN)
+	./rebar clean
 
 distclean: clean
-	$(RM) $(TEST_BIN) $(GENERATED) $(APP) README.html $(addprefix doc/,$(DOCFILES))
+	$(RM) $(TEST_BIN) $(APP) README.html $(addprefix doc/,$(DOCFILES))
 
 count:
 	@sloccount . | awk '/^SLOC\t/,/^Total Physical/ { print }' | grep -v '^$$'
+
+compile: $(GENERATED)
+	./rebar compile
 
