@@ -32,6 +32,7 @@ TEST_BIN := $(patsubst %.erl, %.beam, $(TEST_SRC))
 
 
 all: $(EBIN) $(BIN)
+	./rebar skip_deps=true escriptize
 
 ## Dependencies ##
 

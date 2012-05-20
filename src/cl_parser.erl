@@ -28,7 +28,7 @@
 
 -module(cl_parser).
 
--export([parse_args/2, parse_args/3]).
+-export([parse_args/3, parse_args/4]).
 
 -ifdef(TEST).
 -include("cl_parser_tests.hrl").
@@ -67,10 +67,10 @@
 %%
 %% @see parse_args/3
 
--spec parse_args(desc(), string()) -> {options(), arguments()}.
+-spec parse_args(string(), desc(), string()) -> {options(), arguments()}.
 
-parse_args(Desc, Usage) ->
-    parse_args(Desc, Usage, []).
+parse_args(CLI, Desc, Usage) ->
+    parse_args(CLI, Desc, Usage, []).
 
 
 %% @doc The `Extra' argument is a list of post-processing instructions
@@ -87,11 +87,10 @@ parse_args(Desc, Usage) ->
 %%
 %% @see parse_args/2
 
--spec parse_args(desc(), string(), [any()]) -> {options(), arguments()}.
+-spec parse_args(string(), desc(), string(), [any()]) -> {options(), arguments()}.
 
-parse_args(Desc, Usage, Extra) ->
+parse_args(Args, Desc, Usage, Extra) ->
     Specs = build_specs(Desc),
-    Args = init:get_plain_arguments(),
     try parse(Args, Specs) of
         {Opts, Rest} ->
             case lists:member(help, Opts) of

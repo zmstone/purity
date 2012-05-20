@@ -25,7 +25,7 @@
 
 -module(purity_cli).
 
--export([main/0]).
+-export([main/0, main/1]).
 
 
 -define(plt, purity_plt).
@@ -34,15 +34,27 @@
 -import(?utils, [fmt_mfa/1, str/2, option/2, option/3]).
 -import(?utils, [timeit/3, format_time/1, get_time/0]).
 
-%% @doc Parse any command line arguments, analyse all supplied files
-%% and print the results of the analysis to standard output.
-
+%% @doc keep legacy usage
 -spec main() -> no_return().
-
 main() ->
-    T0 = get_time(),
-    {Options, Files0} = parse_args(),
+  Args = init:get_plain_arguments(),
+  main(Args).
 
+%% @doc Parse any command line arguments
+-spec main(string()) -> ok | no_return().
+main(CLI) ->
+  case parse_args(CLI) of
+    ok ->
+      ok;
+    {Options, Files} ->
+      main(Options, Files)
+  end.
+
+%% @doc analyse all supplied files
+%% and print the results of the analysis to standard output.
+-spec main(list(), list()) -> no_return().
+main(Options, Files0) ->
+    T0 = get_time(),
     with_option(version, Options, fun(true) ->
                 io:format("Purity Analyzer for Erlang, version ~s~n", [?VSN]),
                 halt(0) end),
@@ -181,7 +193,7 @@ format_changed({Mismatch, Errors}) ->
     [str(" E ~s", [F]) || F <- Errors].
 
 
-parse_args() ->
+parse_args(CLI) ->
     Spec = [
         {purelevel, [
                 "-l", "--level",
@@ -245,7 +257,7 @@ parse_args() ->
                 {help, "Print version information and exit"}]}
     ],
     Extra = [only_keep_last, {override, [{termination, purelevel}]}],
-    cl_parser:parse_args(Spec, "usage: purity [options] file(s)", Extra).
+    cl_parser:parse_args(CLI, Spec, "usage: purity [options] file(s)", Extra).
 
 
 pretty_print(Print, {MFA, Result}) ->

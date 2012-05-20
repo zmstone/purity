@@ -44,6 +44,8 @@
 
 -export([module/2, is_pure/2, find_missing/1, analyse_changed/3]).
 
+-export([main/1]).
+
 -export_type([pure/0]).
 
 
@@ -51,6 +53,11 @@
 -type pure()    :: purity_analyse:pure().
 -type options() :: purity_utils:options().
 
+-spec main(any()) -> no_return().
+main([]) ->
+  main(["-h"]);
+main(Args) ->
+  purity_cli:main(Args).
 
 -spec module(cerl:c_module()) -> dict().
 
