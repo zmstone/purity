@@ -1,9 +1,9 @@
 
 # Binaries and intermediate files:
-*.beam
 .*.swp
 *~
-ebin/*.app
+ebin/*
+purity
 src/purity_bifs.erl
 
 # Documentation related:
@@ -15,7 +15,9 @@ doc/*.css
 README.html
 
 # Byproducts of coredump script:
-*.{core,dump,labl}
+*.core
+*.labl
+*.dump
 
 # etags
 TAGS
